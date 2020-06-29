@@ -1,5 +1,5 @@
 FROM quay.io/prometheus/busybox:latest
 
-COPY s3_exporter /bin/s3_exporter
+COPY oss_exporter /bin/oss_exporter
 
-ENTRYPOINT ["/bin/s3_exporter"]
+ENTRYPOINT ["/bin/oss_exporter"]

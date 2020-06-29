@@ -90,7 +90,7 @@ ifeq ($(GOHOSTARCH),amd64)
 endif
 
 .PHONY: all
-all: precheck style staticcheck unused build test
+all: precheck style build
 
 # This rule is used to forward a target like "build" to "common-build".  This
 # allows a new "build" target to be defined in a Makefile which includes this

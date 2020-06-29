@@ -16,7 +16,7 @@ include Makefile.common
 
 STATICCHECK_IGNORE =
 
-DOCKER_IMAGE_NAME ?= s3-exporter
+DOCKER_IMAGE_NAME ?= oss-exporter
 
 # Go modules needs the bzr binary because of the dependency on launchpad.net/gocheck.
 $(eval $(call PRECHECK_COMMAND_template,bzr))
