@@ -58,6 +58,7 @@ type AlgorithmType string
 const (
 	KMSAlgorithm AlgorithmType = "KMS"
 	AESAlgorithm AlgorithmType = "AES256"
+	SM4Algorithm AlgorithmType = "SM4"
 )
 
 // StorageClassType bucket storage type
@@ -167,6 +168,10 @@ const (
 	HTTPHeaderOssSecurityToken               = "X-Oss-Security-Token"
 	HTTPHeaderOssServerSideEncryption        = "X-Oss-Server-Side-Encryption"
 	HTTPHeaderOssServerSideEncryptionKeyID   = "X-Oss-Server-Side-Encryption-Key-Id"
+	HTTPHeaderOssServerSideDataEncryption    = "X-Oss-Server-Side-Data-Encryption"
+	HTTPHeaderSSECAlgorithm                  = "X-Oss-Server-Side-Encryption-Customer-Algorithm"
+	HTTPHeaderSSECKey                        = "X-Oss-Server-Side-Encryption-Customer-Key"
+	HTTPHeaderSSECKeyMd5                     = "X-Oss-Server-Side-Encryption-Customer-Key-MD5"
 	HTTPHeaderOssCopySource                  = "X-Oss-Copy-Source"
 	HTTPHeaderOssCopySourceRange             = "X-Oss-Copy-Source-Range"
 	HTTPHeaderOssCopySourceIfMatch           = "X-Oss-Copy-Source-If-Match"
@@ -187,6 +192,7 @@ const (
 	HTTPHeaderOssTrafficLimit                = "X-Oss-Traffic-Limit"
 	HTTPHeaderOssForbidOverWrite             = "X-Oss-Forbid-Overwrite"
 	HTTPHeaderOssRangeBehavior               = "X-Oss-Range-Behavior"
+	HTTPHeaderOssTaskID                      = "X-Oss-Task-Id"
 )
 
 // HTTP Param
@@ -218,7 +224,7 @@ const (
 
 	NullVersion = "null"
 
-	Version = "v2.1.0" // Go SDK version
+	Version = "v2.1.2" // Go SDK version
 )
 
 // FrameType

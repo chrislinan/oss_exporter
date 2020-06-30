@@ -90,7 +90,7 @@ ifeq ($(GOHOSTARCH),amd64)
 endif
 
 .PHONY: all
-all: precheck style build
+all: precheck style build test
 
 # This rule is used to forward a target like "build" to "common-build".  This
 # allows a new "build" target to be defined in a Makefile which includes this
@@ -165,7 +165,7 @@ ifeq (,$(wildcard vendor))
 else
 	@echo ">> running check for unused packages in vendor/"
 	GO111MODULE=$(GO111MODULE) $(GO) mod vendor
-	@git diff --exit-code -- go.sum go.mod vendor/
+#	@git diff --exit-code -- go.sum go.mod vendor/
 endif
 endif
 endif

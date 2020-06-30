@@ -44,7 +44,7 @@ var signKeyList = []string{"acl", "uploads", "location", "cors",
 	"udfApplicationLog", "restore", "callback", "callback-var", "qosInfo",
 	"policy", "stat", "encryption", "versions", "versioning", "versionId", "requestPayment",
 	"x-oss-request-payer", "sequential",
-	"inventory", "inventoryId", "continuation-token"}
+	"inventory", "inventoryId", "continuation-token", "asyncFetch"}
 
 // init initializes Conn
 func (conn *Conn) init(config *Config, urlMaker *urlMaker, client *http.Client) error {
@@ -68,6 +68,9 @@ func (conn *Conn) init(config *Config, urlMaker *urlMaker, client *http.Client) 
 			transport.Proxy = http.ProxyURL(proxyURL)
 		}
 		client = &http.Client{Transport: transport}
+		if !config.RedirectEnabled {
+			disableHTTPRedirect(client)
+		}
 	}
 
 	conn.config = config

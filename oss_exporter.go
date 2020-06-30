@@ -193,19 +193,6 @@ func main() {
 	// var sess *session.Session
 	var err error
 
-	// sess, err = session.NewSession()
-	// if err != nil {
-	// 	log.Errorln("Error creating sessions ", err)
-	// }
-
-	// cfg := aws.NewConfig()
-	// if *endpointURL != "" {
-	// 	cfg.WithEndpoint(*endpointURL)
-	// }
-
-	// cfg.WithDisableSSL(*disableSSL)
-	// cfg.WithS3ForcePathStyle(*forcePathStyle)
-
 	client, err := oss.New(config.Endpoint, config.AccessID, config.AccessKey)
 	c := ClientWrapper{client}
 	if err != nil {

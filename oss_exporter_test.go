@@ -1,13 +1,14 @@
 package main
 
 import (
+	"io/ioutil"
 	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+	"github.com/jarcoal/httpmock"
 )
 
 var (
@@ -127,60 +128,39 @@ func (tc ossExporterTestCase) testBody(body string, t *testing.T) {
 
 type ossExporterTestCases []ossExporterTestCase
 
-// Returns the mocked response for a bucket+prefix combination
-//func (tcs *ossExporterTestCases) response(bucket, prefix string) (*oss.ListObjectsResult, error) {
-//	for _, c := range *tcs {
-//		if c.Bucket == bucket && c.Prefix == prefix {
-//			return c.ListObjectsResult, nil
-//		}
-//	}
-//
-//	return nil, errors.New("Can't find a response for the bucket and prefix combination")
-//}
-
 // TestProbeHandler iterates over a list of test cases
 func TestProbeHandler(t *testing.T) {
+
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+	var uri string
+
 	for _, c := range testCases {
-		rr, err := probe(c.Bucket, c.Prefix)
+		prefix := c.Prefix
+		bucket := c.Bucket
+
+		if len(prefix) > 0 {
+			uri = "/probe?bucket=" + bucket + "&prefix=" + prefix
+		} else {
+			uri = "/probe?bucket=" + bucket
+		}
+		httpmock.RegisterResponder("GET", uri,
+			func(req *http.Request) (*http.Response, error) {
+				resp := httpmock.NewStringResponse(200, strings.Join(c.ExpectedOutputLines, ","))
+				return resp, nil
+			},
+		)
+
+		resp, err := http.Get(uri)
 		if err != nil {
 			t.Errorf(err.Error())
 		}
 
-		c.testBody(rr.Body.String(), t)
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			t.Errorf(err.Error())
+		}
+		bodyString := string(bodyBytes)
+		c.testBody(bodyString, t)
 	}
-}
-
-// ListObjectsV2 mocks out the corresponding function in the S3 client, returning the response that corresponds to the test case
-//func (m *oss.Bucket) ListObjects(bucket, prefix string) (*oss.ListObjectsResult, error) {
-//	r, err := testCases.response(bucket, prefix)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return r, nil
-//}
-
-// Repeatable probe function
-func probe(bucket, prefix string) (rr *httptest.ResponseRecorder, err error) {
-	var uri string
-	var client IClient
-	//client = oss.Client{}
-	if len(prefix) > 0 {
-		uri = "/probe?bucket=" + bucket + "&prefix=" + prefix
-	} else {
-		uri = "/probe?bucket=" + bucket
-	}
-	req, err := http.NewRequest("GET", uri, nil)
-	if err != nil {
-		return
-	}
-
-	rr = httptest.NewRecorder()
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		probeHandler(w, r, client)
-	})
-
-	handler.ServeHTTP(rr, req)
-
-	return
 }

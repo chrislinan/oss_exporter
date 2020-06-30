@@ -310,9 +310,10 @@ type BucketInfo struct {
 }
 
 type SSERule struct {
-	XMLName        xml.Name `xml:"ServerSideEncryptionRule"` // Bucket ServerSideEncryptionRule
-	KMSMasterKeyID string   `xml:"KMSMasterKeyID"`           // Bucket KMSMasterKeyID
-	SSEAlgorithm   string   `xml:"SSEAlgorithm"`             // Bucket SSEAlgorithm
+	XMLName           xml.Name `xml:"ServerSideEncryptionRule"`    // Bucket ServerSideEncryptionRule
+	KMSMasterKeyID    string   `xml:"KMSMasterKeyID,omitempty"`    // Bucket KMSMasterKeyID
+	SSEAlgorithm      string   `xml:"SSEAlgorithm,omitempty"`      // Bucket SSEAlgorithm
+	KMSDataEncryption string   `xml:"KMSDataEncryption,omitempty"` //Bucket KMSDataEncryption
 }
 
 // ListObjectsResult defines the result from ListObjects request
@@ -828,9 +829,10 @@ type ServerEncryptionRule struct {
 
 // Server Encryption deafult rule for the bucket
 type SSEDefaultRule struct {
-	XMLName        xml.Name `xml:"ApplyServerSideEncryptionByDefault"`
-	SSEAlgorithm   string   `xml:"SSEAlgorithm"`
-	KMSMasterKeyID string   `xml:"KMSMasterKeyID"`
+	XMLName           xml.Name `xml:"ApplyServerSideEncryptionByDefault"`
+	SSEAlgorithm      string   `xml:"SSEAlgorithm,omitempty"`
+	KMSMasterKeyID    string   `xml:"KMSMasterKeyID,omitempty"`
+	KMSDataEncryption string   `xml:"KMSDataEncryption,,omitempty"`
 }
 
 type GetBucketEncryptionResult ServerEncryptionRule
@@ -1133,4 +1135,43 @@ type RestoreConfiguration struct {
 	XMLName xml.Name `xml:"RestoreRequest"`
 	Days    int32    `xml:"Days,omitempty"`
 	Tier    string   `xml:"JobParameters>Tier,omitempty"`
+}
+
+// AsyncFetchTaskConfiguration for SetBucketAsyncFetchTask
+type AsyncFetchTaskConfiguration struct {
+	XMLName       xml.Name `xml:"AsyncFetchTaskConfiguration"`
+	Url           string   `xml:"Url,omitempty"`
+	Object        string   `xml:"Object,omitempty"`
+	Host          string   `xml:"Host,omitempty"`
+	ContentMD5    string   `xml:"ContentMD5,omitempty"`
+	Callback      string   `xml:"Callback,omitempty"`
+	StorageClass  string   `xml:"StorageClass,omitempty"`
+	IgnoreSameKey bool     `xml:"IgnoreSameKey"`
+}
+
+// AsyncFetchTaskResult for SetBucketAsyncFetchTask result
+type AsyncFetchTaskResult struct {
+	XMLName xml.Name `xml:"AsyncFetchTaskResult"`
+	TaskId  string   `xml:"TaskId,omitempty"`
+}
+
+// AsynFetchTaskInfo for GetBucketAsyncFetchTask result
+type AsynFetchTaskInfo struct {
+	XMLName  xml.Name      `xml:"AsyncFetchTaskInfo"`
+	TaskId   string        `xml:"TaskId,omitempty"`
+	State    string        `xml:"State,omitempty"`
+	ErrorMsg string        `xml:"ErrorMsg,omitempty"`
+	TaskInfo AsyncTaskInfo `xml:"TaskInfo,omitempty"`
+}
+
+// AsyncTaskInfo for async task information
+type AsyncTaskInfo struct {
+	XMLName       xml.Name `xml:"TaskInfo"`
+	Url           string   `xml:"Url,omitempty"`
+	Object        string   `xml:"Object,omitempty"`
+	Host          string   `xml:"Host,omitempty"`
+	ContentMD5    string   `xml:"ContentMD5,omitempty"`
+	Callback      string   `xml:"Callback,omitempty"`
+	StorageClass  string   `xml:"StorageClass,omitempty"`
+	IgnoreSameKey bool     `xml:"IgnoreSameKey"`
 }

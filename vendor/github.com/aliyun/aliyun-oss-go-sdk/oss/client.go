@@ -746,6 +746,10 @@ func (client Client) GetBucketInfo(bucketName string, options ...Option) (GetBuc
 		if out.BucketInfo.SseRule.SSEAlgorithm == "None" {
 			out.BucketInfo.SseRule.SSEAlgorithm = ""
 		}
+
+		if out.BucketInfo.SseRule.KMSDataEncryption == "None" {
+			out.BucketInfo.SseRule.KMSDataEncryption = ""
+		}
 	}
 	return out, err
 }
@@ -1343,6 +1347,66 @@ func (client Client) DeleteBucketInventory(bucketName, strInventoryId string, op
 	return CheckRespCode(resp.StatusCode, []int{http.StatusNoContent})
 }
 
+// SetBucketAsyncTask API operation for set async fetch task
+//
+// bucketName tht bucket name.
+//
+// asynConf  configruation
+//
+// error  it's nil if success, otherwise it's an error.
+func (client Client) SetBucketAsyncTask(bucketName string, asynConf AsyncFetchTaskConfiguration, options ...Option) (AsyncFetchTaskResult, error) {
+	var out AsyncFetchTaskResult
+	params := map[string]interface{}{}
+	params["asyncFetch"] = nil
+
+	var bs []byte
+	bs, err := xml.Marshal(asynConf)
+
+	if err != nil {
+		return out, err
+	}
+
+	buffer := new(bytes.Buffer)
+	buffer.Write(bs)
+
+	contentType := http.DetectContentType(buffer.Bytes())
+	headers := make(map[string]string)
+	headers[HTTPHeaderContentType] = contentType
+
+	resp, err := client.do("POST", bucketName, params, headers, buffer, options...)
+
+	if err != nil {
+		return out, err
+	}
+
+	defer resp.Body.Close()
+	err = xmlUnmarshal(resp.Body, &out)
+	return out, err
+}
+
+// GetBucketAsyncTask API operation for set async fetch task
+//
+// bucketName tht bucket name.
+//
+// taskid  returned by SetBucketAsyncTask
+//
+// error  it's nil if success, otherwise it's an error.
+func (client Client) GetBucketAsyncTask(bucketName string, taskID string, options ...Option) (AsynFetchTaskInfo, error) {
+	var out AsynFetchTaskInfo
+	params := map[string]interface{}{}
+	params["asyncFetch"] = nil
+
+	headers := make(map[string]string)
+	headers[HTTPHeaderOssTaskID] = taskID
+	resp, err := client.do("GET", bucketName, params, headers, nil, options...)
+	if err != nil {
+		return out, err
+	}
+	defer resp.Body.Close()
+	err = xmlUnmarshal(resp.Body, &out)
+	return out, err
+}
+
 // SecurityToken sets the temporary user's SecurityToken.
 //
 // token    STS token
@@ -1478,12 +1542,37 @@ func AdditionalHeaders(headers []string) ClientOption {
 	}
 }
 
+// only effective from go1.7 onward,RedirectEnabled set http redirect enabled or not
+func RedirectEnabled(enabled bool) ClientOption {
+	return func(client *Client) {
+		client.Config.RedirectEnabled = enabled
+	}
+}
+
 // Private
 func (client Client) do(method, bucketName string, params map[string]interface{},
 	headers map[string]string, data io.Reader, options ...Option) (*Response, error) {
 	err := CheckBucketName(bucketName)
 	if len(bucketName) > 0 && err != nil {
 		return nil, err
+	}
+
+	// option headers
+	addHeaders := make(map[string]string)
+	err = handleOptions(addHeaders, options)
+	if err != nil {
+		return nil, err
+	}
+
+	// merge header
+	if headers == nil {
+		headers = make(map[string]string)
+	}
+
+	for k, v := range addHeaders {
+		if _, ok := headers[k]; !ok {
+			headers[k] = v
+		}
 	}
 
 	resp, err := client.Conn.Do(method, bucketName, "", params, headers, data, 0, nil)
