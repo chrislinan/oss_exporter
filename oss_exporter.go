@@ -20,6 +20,15 @@ const (
 )
 
 var (
+	app           = kingpin.New(namespace+"_exporter", "Export metrics for oss certificates").DefaultEnvars()
+	listenAddress = app.Flag("web.listen-address", "Address to listen on for web interface and telemetry.").Default(":9340").String()
+	metricsPath   = app.Flag("web.metrics-path", "Path under which to expose metrics").Default("/metrics").String()
+	probePath     = app.Flag("web.probe-path", "Path under which to expose the probe endpoint").Default("/probe").String()
+	endpoint      = app.Flag("oss.endpoint", "endpoint URL (required)").Default("").String()
+	bucketName    = app.Flag("oss.bucket-name", "Bucket name on alicloud OSS (required)").Default("").String()
+)
+
+var (
 	ossListSuccess = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "list_success"),
 		"If the ListObjects operation was a success",
@@ -93,7 +102,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	var biggestObjectSize int64
 	var lastObjectSize int64
 
-	bucket, err := e.client.Bucket(config.BucketName)
+	bucket, err := e.client.Bucket(*bucketName)
 	if err != nil {
 		log.Errorln(err)
 		ch <- prometheus.MustNewConstMetric(
@@ -175,15 +184,6 @@ func init() {
 }
 
 func main() {
-	var (
-		app           = kingpin.New(namespace+"_exporter", "Export metrics for oss certificates").DefaultEnvars()
-		listenAddress = app.Flag("web.listen-address", "Address to listen on for web interface and telemetry.").Default(":9340").String()
-		metricsPath   = app.Flag("web.metrics-path", "Path under which to expose metrics").Default("/metrics").String()
-		probePath     = app.Flag("web.probe-path", "Path under which to expose the probe endpoint").Default("/probe").String()
-		//endpointURL    = app.Flag("oss.endpoint-url", "Custom endpoint URL").Default("").String()
-		//disableSSL     = app.Flag("oss.disable-ssl", "Custom disable SSL").Bool()
-		//forcePathStyle = app.Flag("oss.force-path-style", "Custom force path style").Bool()
-	)
 
 	log.AddFlags(kingpin.CommandLine)
 	app.Version(version.Print(namespace + "_exporter"))
@@ -193,7 +193,11 @@ func main() {
 	// var sess *session.Session
 	var err error
 
-	client, err := oss.New(config.Endpoint, config.AccessID, config.AccessKey)
+	if len(*bucketName) == 0 || len(*endpoint) == 0 {
+		log.Errorf("Please specify both bucketName(--oss.bucket-name=) and endpoint(--oss.endpoint=)")
+		os.Exit(1)
+	}
+	client, err := oss.New(*endpoint, config.AccessID, config.AccessKey)
 	c := ClientWrapper{client}
 	if err != nil {
 		log.Errorln("Error creating client ", err)
