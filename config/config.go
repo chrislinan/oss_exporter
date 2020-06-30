@@ -4,8 +4,10 @@ import "os"
 
 var (
 	// Sample code's env configuration. You need to specify them with the actual configuration if you want to run sample code
-	AccessID  = os.Getenv("OSS_ACCESS_KEY_ID")
-	AccessKey = os.Getenv("OSS_ACCESS_KEY_SECRET")
+	AccessID   = os.Getenv("OSS_ACCESS_KEY_ID")
+	AccessKey  = os.Getenv("OSS_ACCESS_KEY_SECRET")
+	BucketName = os.Getenv("OSS_BUCKET")
+	Endpoint   = os.Getenv("OSS_ENDPOINT")
 
 	// Credential
 	//credentialAccessID  = os.Getenv("OSS_CREDENTIAL_KEY_ID")

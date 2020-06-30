@@ -24,8 +24,8 @@ var (
 	listenAddress = app.Flag("web.listen-address", "Address to listen on for web interface and telemetry.").Default(":9340").String()
 	metricsPath   = app.Flag("web.metrics-path", "Path under which to expose metrics").Default("/metrics").String()
 	probePath     = app.Flag("web.probe-path", "Path under which to expose the probe endpoint").Default("/probe").String()
-	endpoint      = app.Flag("oss.endpoint", "endpoint URL (required)").Default("").String()
-	bucketName    = app.Flag("oss.bucket-name", "Bucket name on alicloud OSS (required)").Default("").String()
+	//endpoint      = app.Flag("oss.endpoint", "endpoint URL (required)").Default("").String()
+	//bucketName    = app.Flag("oss.bucket-name", "Bucket name on alicloud OSS (required)").Default("").String()
 )
 
 var (
@@ -102,7 +102,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	var biggestObjectSize int64
 	var lastObjectSize int64
 
-	bucket, err := e.client.Bucket(*bucketName)
+	bucket, err := e.client.Bucket(config.BucketName)
 	if err != nil {
 		log.Errorln(err)
 		ch <- prometheus.MustNewConstMetric(
@@ -193,11 +193,17 @@ func main() {
 	// var sess *session.Session
 	var err error
 
-	if len(*bucketName) == 0 || len(*endpoint) == 0 {
-		log.Errorf("Please specify both bucketName(--oss.bucket-name=) and endpoint(--oss.endpoint=)")
+	if len(config.Endpoint) == 0 || len(config.BucketName) == 0 {
+		log.Errorf("Please specify OSS_BUCKET and OSS_ENDPOINT environment variables")
 		os.Exit(1)
 	}
-	client, err := oss.New(*endpoint, config.AccessID, config.AccessKey)
+
+	if len(config.AccessKey) == 0 || len(config.AccessID) == 0 {
+		log.Errorf("Please specify OSS_ACCESS_KEY_ID and OSS_ACCESS_KEY_SECRET environment variables")
+		os.Exit(1)
+	}
+
+	client, err := oss.New(config.Endpoint, config.AccessID, config.AccessKey)
 	c := ClientWrapper{client}
 	if err != nil {
 		log.Errorln("Error creating client ", err)

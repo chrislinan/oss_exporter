@@ -11,7 +11,7 @@ make
 ```
 
 ## Running
-Before runing this tool you need to set two environment variables: `OSS_ACCESS_KEY_ID` and `OSS_ACCESS_KEY_SECRET`
+Before runing this tool you need to set these environment variables: `OSS_ACCESS_KEY_ID`, `OSS_ACCESS_KEY_SECRET`,`OSS_BUCKET` and `OSS_ENDPOINT`
 ```
 ./oss_exporter <flags>
 ```
@@ -27,8 +27,6 @@ curl localhost:9340/probe?bucket=some-bucket&prefix=some-folder/some-file.txt
  * __`--web.listen-address`:__ The port (default ":9340").
  * __`--web.metrics-path`:__ The path metrics are exposed under (default "/metrics")
  * __`--web.probe-path`:__ The path the probe endpoint is exposed under (default "/probe")
- * __`--oss.endpoint` :__ endpoint URL (required)
- * __`--oss.bucket-name` :__ Bucket name on alicloud OSS (required)
  * __`--version` :__ Show application version.
 
 ## Metrics
