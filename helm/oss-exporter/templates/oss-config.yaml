@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oss-config
+  namespace: vault
+data:
+  endpoint: {{ .Values.ossexporter.endpoint }}
+  bucket: {{ .Values.ossexporter.bucket }}

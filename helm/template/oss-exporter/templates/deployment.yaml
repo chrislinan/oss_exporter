@@ -1,0 +1,71 @@
+---
+# Source: oss-exporter/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oss-exporter
+  namespace: vault
+  labels:
+    app.kubernetes.io/name: oss-exporter
+    helm.sh/chart: oss-exporter-0.0.4
+    app.kubernetes.io/instance: oss-exporter
+    app.kubernetes.io/version: "1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: oss-exporter
+      app.kubernetes.io/instance: oss-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: oss-exporter
+        app.kubernetes.io/instance: oss-exporter
+    spec:
+      imagePullSecrets:
+        - name: dockersecret
+      serviceAccountName: oss-exporter
+      securityContext:
+        {}
+      containers:
+        - name: oss-exporter
+          securityContext:
+            {}
+          image: "registry.k8s.aliondemand.org:4300/com.sap.hana.cloud.vault/oss-exporter:0.0.4"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: OSS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: ali
+                  key: accessKeyID
+            - name: OSS_ACCESS_KEY_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ali
+                  key: accessKeySecret
+            - name: OSS_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: oss-config
+                  key: endpoint
+            - name: OSS_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: oss-config
+                  key: bucket
+          ports:
+            - name: http
+              containerPort: 9340
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {}

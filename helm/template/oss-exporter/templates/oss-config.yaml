@@ -1,0 +1,10 @@
+---
+# Source: oss-exporter/templates/oss-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oss-config
+  namespace: vault
+data:
+  endpoint: http://oss-cn-shanghai.aliyuncs.com
+  bucket: vault-backup

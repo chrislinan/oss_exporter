@@ -1,0 +1,82 @@
+# Default values for s3-exporter.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+name: oss-exporter
+namespace: vault
+nameOverride: ""
+fullnameOverride: ""
+replicaCount: 1
+
+ossexporter:
+  name: oss-exporter
+  port: 9340
+  host: oss-exporter.vault-prd.vault-prd.shoot.can.k8s.vlab-sapcloudplatformdev.cn
+  ingressDomain: ingress.vault-prd.vault-prd.shoot.can.k8s.vlab-sapcloudplatformdev.cn
+  bucket: vault-backup
+  endpoint: http://oss-cn-shanghai.aliyuncs.com
+
+image:
+  registry: registry.k8s.aliondemand.org:4300/
+  repository: com.sap.hana.cloud.vault/oss-exporter
+  tag: 0.0.4
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: 
+  - name: dockersecret
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: "oss-exporter"
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 9340 
+
+ingress:
+  enabled: false
+  annotations: 
+     kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: oss-exporter.vault-prd.vault-prd.shoot.can.k8s.vlab-sapcloudplatformdev.cn
+      paths: []
+
+  tls: 
+    - secretName: wildcard-tls
+      hosts:
+        - oss-exporter.vault-prd.vault-prd.shoot.can.k8s.vlab-sapcloudplatformdev.cn
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
